@@ -8,108 +8,111 @@
  * @format
  */
 
- import React from 'react';
- import {
-   SafeAreaView,
-   ScrollView,
-   StatusBar,
-   StyleSheet,
-   Text,
-   useColorScheme,
-   View,
- } from 'react-native';
+import React from 'react';
+import {
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  useColorScheme,
+  View,
+  Text,
+  TextInput,
+  Button,
+} from 'react-native';
 
- import {
-   Colors,
-   DebugInstructions,
-   Header,
-   LearnMoreLinks,
-   ReloadInstructions,
- } from 'react-native/Libraries/NewAppScreen';
+import {Colors} from 'react-native/Libraries/NewAppScreen';
+import useTodoList from './src/todo-hooks';
 
- const Section: React.FC<{
-   title: string;
- }> = ({children, title}) => {
-   const isDarkMode = useColorScheme() === 'dark';
-   return (
-     <View style={styles.sectionContainer}>
-       <Text
-         style={[
-           styles.sectionTitle,
-           {
-             color: isDarkMode ? Colors.white : Colors.black,
-           },
-         ]}>
-         {title}
-       </Text>
-       <Text
-         style={[
-           styles.sectionDescription,
-           {
-             color: isDarkMode ? Colors.light : Colors.dark,
-           },
-         ]}>
-         {children}
-       </Text>
-     </View>
-   );
- };
+const App = () => {
+  const isDarkMode = useColorScheme() === 'dark';
 
- const App = () => {
-   const isDarkMode = useColorScheme() === 'dark';
+  const backgroundStyle = {
+    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+  };
 
-   const backgroundStyle = {
-     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-   };
+  const [
+    {inputValue, todoList},
+    {setInputValue, createTodoItem, completeTodoItem, removeTodoItem},
+  ] = useTodoList();
 
-   return (
-     <SafeAreaView style={backgroundStyle}>
-       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-       <ScrollView
-         contentInsetAdjustmentBehavior="automatic"
-         style={backgroundStyle}>
-         <Header />
-         <View
-           style={{
-             backgroundColor: isDarkMode ? Colors.black : Colors.white,
-           }}>
-           <Section title="Step One">
-             Edit <Text style={styles.highlight}>App.js</Text> to change this
-             screen and then come back to see your edits.
-           </Section>
-           <Section title="See Your Changes">
-             <ReloadInstructions />
-           </Section>
-           <Section title="Debug">
-             <DebugInstructions />
-           </Section>
-           <Section title="Learn More">
-             Read the docs to discover what to do next:
-           </Section>
-           <LearnMoreLinks />
-         </View>
-       </ScrollView>
-     </SafeAreaView>
-   );
- };
+  return (
+    <SafeAreaView style={backgroundStyle}>
+      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+      <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
+        style={backgroundStyle}>
+        {/* <Header /> */}
+        <View
+          style={{
+            backgroundColor: isDarkMode ? Colors.black : Colors.white,
+            ...styles.todoContainer,
+          }}>
+          <View style={styles.todoInputContainer}>
+            <TextInput
+              style={styles.todoInput}
+              value={inputValue}
+              onChangeText={e => setInputValue(e)}
+              placeholder="输入待办事项"
+            />
 
- const styles = StyleSheet.create({
-   sectionContainer: {
-     marginTop: 32,
-     paddingHorizontal: 24,
-   },
-   sectionTitle: {
-     fontSize: 24,
-     fontWeight: '600',
-   },
-   sectionDescription: {
-     marginTop: 8,
-     fontSize: 18,
-     fontWeight: '400',
-   },
-   highlight: {
-     fontWeight: '700',
-   },
- });
+            <Button title="创建" onPress={() => createTodoItem()} />
+          </View>
 
- export default App;
+          <View>
+            {todoList.map(item => {
+              return (
+                <View key={item.id} style={styles.todoItem}>
+                  <View>
+                    <Text
+                      style={item.isComplete ? styles.completeTodoContent : {}}>
+                      {item.content}
+                    </Text>
+                  </View>
+                  {item.isComplete ? (
+                    <Button
+                      title="删除"
+                      onPress={() => removeTodoItem(item.id)}
+                    />
+                  ) : (
+                    <Button
+                      title="完成"
+                      onPress={() => completeTodoItem(item.id)}
+                    />
+                  )}
+                </View>
+              );
+            })}
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+};
+
+const styles = StyleSheet.create({
+  todoContainer: {
+    display: 'flex',
+  },
+  todoInputContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  todoInput: {
+    // width: 250,
+    flex: 1,
+  },
+  todoItem: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  completeTodoContent: {
+    textDecorationLine: 'line-through',
+  },
+});
+
+export default App;
